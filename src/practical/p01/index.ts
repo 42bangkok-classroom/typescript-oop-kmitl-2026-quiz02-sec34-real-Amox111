@@ -1,52 +1,50 @@
 import axios from "axios";
 
-interface Geo {
-    lat: string;
-    lng: string;
-}
-
-interface Address {
-    street: string;
-    suite: string;
-    city: string;
-    zipcode: string;
-    geo: Geo;
-}
-
-interface ApiUser {
-    id: number;
-    name: string;
-    phone: string;
-    address: Address;
-}
-
-interface UserResult {
-    id: number;
-    name: string;
-    phone: string;
-    address: Address | null;
-}
-
-const filterUserById = async (id: number): Promise<UserResult | string> => {
-  try {
-    const url = 'https://jsonplaceholder.typicode.com/users';
-    const response = await axios.get<ApiUser[]>(url);
-    const foundUser = response.data.find((u) => u.id === id);
-
-    if (!foundUser) {
-      return "Invalid id";
-    }
-
-    return {
-      id: foundUser.id,
-      name: foundUser.name,
-      phone: foundUser.phone,
-      address: foundUser.address || null
-    };
-
-  } catch (error) {
-    return "Invalid id";
-  }
+type Geo = {
+  lat: string;
+  lng: string;
 };
 
-export default filterUserById;
+type Address = {
+  street: string;
+  suite: string;
+  city: string;
+  zipcode: string;
+  geo: Geo;
+};
+
+type UserResult = {
+  id: number;
+  name: string;
+  phone: string;
+  address: Address | null;
+};
+
+type ApiUser = {
+  id: number;
+  name: string;
+  phone: string;
+  address: Address;
+};
+
+export async function getPostalAddress(): Promise<UserResult[]> {
+  try {
+    const response = await axios.get<ApiUser[]>("https://jsonplaceholder.typicode.com/users");
+
+    if (!response.data || !Array.isArray(response.data)) {
+      return [];
+    }
+
+    return response.data.map((user) => ({
+      id: user.id,
+      name: user.name,
+      phone: user.phone,
+      // กฎ: ถ้าไม่มี address ให้เป็น null
+      address: user.address ? user.address : null,
+    }));
+
+  } catch {
+    // กฎ Subject 1: กรณี Error ปกติให้คืนค่า Array ว่าง (ต่างจาก Subject 4 ที่ต้องแจ้งเตือน)
+    return [];
+  }
+}
