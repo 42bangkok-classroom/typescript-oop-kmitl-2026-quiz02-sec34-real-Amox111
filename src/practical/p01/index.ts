@@ -39,12 +39,10 @@ export async function getPostalAddress(): Promise<UserResult[]> {
       id: user.id,
       name: user.name,
       phone: user.phone,
-      // กฎ: ถ้าไม่มี address ให้เป็น null
       address: user.address ? user.address : null,
     }));
 
   } catch {
-    // กฎ Subject 1: กรณี Error ปกติให้คืนค่า Array ว่าง (ต่างจาก Subject 4 ที่ต้องแจ้งเตือน)
     return [];
   }
 }
